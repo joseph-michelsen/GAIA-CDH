@@ -10,6 +10,11 @@
             "includePath": [
                 "/Users/josephmichelsen/LocalRepositories/ASEN4018/GAIA-CDH/include",
                 "/Users/josephmichelsen/LocalRepositories/ASEN4018/GAIA-CDH/src",
+                "/Users/josephmichelsen/LocalRepositories/ASEN4018/GAIA-CDH/.pio/libdeps/reverse_tft/Adafruit ST7735 and ST7789 Library",
+                "/Users/josephmichelsen/LocalRepositories/ASEN4018/GAIA-CDH/.pio/libdeps/reverse_tft/Adafruit GFX Library",
+                "/Users/josephmichelsen/LocalRepositories/ASEN4018/GAIA-CDH/.pio/libdeps/reverse_tft/Adafruit BusIO",
+                "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
+                "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/newlib/platform_include",
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include",
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include/esp_additions/freertos",
@@ -209,6 +214,7 @@
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_qspi/include",
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/cores/esp32",
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/variants/adafruit_feather_esp32s3_reversetft",
+                "/Users/josephmichelsen/LocalRepositories/ASEN4018/GAIA-CDH/.pio/libdeps/reverse_tft/Adafruit seesaw Library",
                 "/Users/josephmichelsen/LocalRepositories/ASEN4018/GAIA-CDH/.pio/libdeps/reverse_tft/Unity/src",
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
@@ -232,7 +238,6 @@
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/RainMaker/src",
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/SD/src",
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/SD_MMC/src",
-                "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/SPIFFS/src",
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/SimpleBLE/src",
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/Ticker/src",
@@ -242,7 +247,6 @@
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src",
                 "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src",
-                "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                 ""
             ],
             "browse": {
@@ -250,6 +254,11 @@
                 "path": [
                     "/Users/josephmichelsen/LocalRepositories/ASEN4018/GAIA-CDH/include",
                     "/Users/josephmichelsen/LocalRepositories/ASEN4018/GAIA-CDH/src",
+                    "/Users/josephmichelsen/LocalRepositories/ASEN4018/GAIA-CDH/.pio/libdeps/reverse_tft/Adafruit ST7735 and ST7789 Library",
+                    "/Users/josephmichelsen/LocalRepositories/ASEN4018/GAIA-CDH/.pio/libdeps/reverse_tft/Adafruit GFX Library",
+                    "/Users/josephmichelsen/LocalRepositories/ASEN4018/GAIA-CDH/.pio/libdeps/reverse_tft/Adafruit BusIO",
+                    "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
+                    "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/newlib/platform_include",
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include",
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include/esp_additions/freertos",
@@ -449,6 +458,7 @@
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_qspi/include",
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/cores/esp32",
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/variants/adafruit_feather_esp32s3_reversetft",
+                    "/Users/josephmichelsen/LocalRepositories/ASEN4018/GAIA-CDH/.pio/libdeps/reverse_tft/Adafruit seesaw Library",
                     "/Users/josephmichelsen/LocalRepositories/ASEN4018/GAIA-CDH/.pio/libdeps/reverse_tft/Unity/src",
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
@@ -472,7 +482,6 @@
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/RainMaker/src",
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/SD/src",
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/SD_MMC/src",
-                    "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/SPIFFS/src",
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/SimpleBLE/src",
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/Ticker/src",
@@ -482,7 +491,6 @@
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src",
                     "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src",
-                    "/Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                     ""
                 ]
             },
