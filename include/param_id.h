@@ -14,5 +14,6 @@ enum class ParamID : uint8_t // Define an enumeration class named ParamID with a
     PH, // Identifier for the pH level parameter.
     ELECTRONICS_TEMP, // Identifier for the electronics temperature parameter.
     BATT_SOC, // Identifier for the battery state of charge (SOC) parameter.
+    BATT_VOLTAGE, // Identifier for the battery voltage parameter.
     COUNT // Identifier for the total count of parameters (used for iteration or validation).
 };
