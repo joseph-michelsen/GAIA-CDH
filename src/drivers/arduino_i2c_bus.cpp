@@ -63,4 +63,6 @@ Status ArduinoI2CBus::writeRegs(uint8_t addr, uint8_t reg, const uint8_t* data, 
 
         delay(2); // Delay for 2 milliseconds before retrying the write operation.
     }
+
+    return Status::BUS_ERROR; // Return BUS_ERROR if the read operation fails after the maximum number of attempts.
 }
