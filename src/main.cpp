@@ -2,6 +2,7 @@
 #include <Wire.h> // Include the Wire library for I2C communication.
 #include "board_pins.h" // Include the header file that defines the pin mappings for the board.
 #include "drivers/arduino_i2c_bus.h" // Include the header file that defines the ArduinoI2CBus class for I2C communication using the Arduino Wire library.
+#include "drivers/max17048.h" // Include the header file that defines the Max17048 class for battery fuel gauge functionality.
 
 #ifdef HAS_DEBUG_DISPLAY // Check if the HAS_DEBUG_DISPLAY macro is defined to include the display-related libraries and code.
 #include <Adafruit_GFX.h> // Include the Adafruit GFX library for graphics support.
@@ -10,6 +11,7 @@ static Adafruit_ST7789 tft(TFT_CS, TFT_DC, TFT_RST);
 #endif
 
 static ArduinoI2CBus bus0(Wire); // Create an instance of the ArduinoI2CBus class for I2C communication using the Wire library.
+static Max17048 battery(bus0); // Create an instance of the Max17048 class for battery fuel gauge functionality using the ArduinoI2CBus instance bus0.
 
 static void scanBus()
 {
@@ -30,9 +32,9 @@ static void scanBus()
     if (bus0.probe(addr)) // Check if a device is present at the current I2C address.
     {
       found++; // Increment the counter for the number of devices found.
-      Serial.printf(" found 0x%02X\n", addr); // Print the address of the found device to the serial monitor.
+      Serial.printf("  found 0x%02X\n", addr); // Print the address of the found device to the serial monitor.
       #ifdef HAS_DEBUG_DISPLAY
-      tft.printf(" found 0x%02X\n", addr); // Print the address of the found device to the TFT display.
+      tft.printf("  found 0x%02X\n", addr); // Print the address of the found device to the TFT display.
       #endif
     }
   }
@@ -67,10 +69,31 @@ void setup()
   {
     Serial.println("Failed to initialize I2C bus"); // Print an error message to the serial monitor if the I2C bus initialization fails.
   }
+
+  scanBus(); // Call the scanBus function to scan the I2C bus for connected devices.
+  Serial.printf("max17048 begin: %s\n", statusName(battery.begin())); // Initialize the Max17048 battery fuel gauge and print the status of the initialization to the serial monitor.
 }
 
 void loop() 
 {
-  scanBus(); // Call the scanBus function to scan the I2C bus for connected devices.
-  delay(5000); // Wait for 5 seconds before scanning the I2C bus again.
-}
+  static uint32_t MET_s = 0; // Initialize a static variable to keep track of the Mission Elapsed Time (MET) in seconds.
+  Sample s[2]; // Create an array of Sample structs to hold the battery voltage and state of charge readings.
+  size_t n = battery.read(s, 2, MET_s); 
+  for (size_t i = 0; i < n; i++) 
+  {
+    Serial.printf("%s %d = %.3f [%s]\n", battery.name(), static_cast<int>(s[i].id), s[i].value, statusName(s[i].status));
+  }
+  #ifdef HAS_DEBUG_DISPLAY
+  tft.fillScreen(ST77XX_BLACK);
+  tft.setCursor(0, 0);
+  tft.setTextSize(2);
+  tft.setTextColor(ST77XX_WHITE);
+  tft.println("Battery");
+  tft.printf("%.2f V  %s\n", s[0].value, statusName(s[0].status));
+  tft.printf("%.1f %%  %s\n", s[1].value, statusName(s[1].status));
+  tft.printf("MET %lu s\n", static_cast<unsigned long>(MET_s));
+  #endif
+
+  MET_s += 2;
+  delay(2000);
+  }
