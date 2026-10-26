@@ -3,7 +3,7 @@
 
 namespace pins
 {
-    constexpr uint8_t I2C0_SDA = 3;
+    constexpr uint8_t I2C0_SDA = 3; 
     constexpr uint8_t I2C0_SCL = 4;
     constexpr uint8_t I2C1_SDA = 5;
     constexpr uint8_t I2C1_SCL = 6;

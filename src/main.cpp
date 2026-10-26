@@ -78,10 +78,10 @@ void loop()
 {
   static uint32_t MET_s = 0; // Initialize a static variable to keep track of the Mission Elapsed Time (MET) in seconds.
   Sample s[2]; // Create an array of Sample structs to hold the battery voltage and state of charge readings.
-  size_t n = battery.read(s, 2, MET_s); 
+  size_t n = battery.read(s, 2, MET_s); // Read the battery voltage and state of charge from the Max17048 battery fuel gauge and store the readings in the Sample array s. The function returns the number of samples read, which is stored in the variable n.
   for (size_t i = 0; i < n; i++) 
   {
-    Serial.printf("%s %d = %.3f [%s]\n", battery.name(), static_cast<int>(s[i].id), s[i].value, statusName(s[i].status));
+    Serial.printf("%s %d = %.3f [%s]\n", battery.name(), static_cast<int>(s[i].id), s[i].value, statusName(s[i].status)); // Print the name of the sensor, the parameter ID, the value of the reading, and the status of the reading to the serial monitor for each sample read from the battery fuel gauge.
   }
   #ifdef HAS_DEBUG_DISPLAY
   tft.fillScreen(ST77XX_BLACK);
