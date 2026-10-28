@@ -3,17 +3,17 @@
 
 enum class ParamID : uint8_t // Define an enumeration class named ParamID with a fixed underlying type of uint8_t to represent unique identifiers for various parameters in the system.
 {
-    AIR_TEMP, // Identifier for the air temperature parameter.
-    HUMIDITY, // Identifier for the humidity parameter.
-    PRESSURE, // Identifier for the pressure parameter.
-    CO2, // Identifier for the carbon dioxide (CO2) parameter.
-    O2, // Identifier for the oxygen (O2) parameter.
-    LIGHT, // Identifier for the light intensity parameter.
-    WATER_TEMP, // Identifier for the water temperature parameter.
-    WATER_LEVEL, // Identifier for the water level parameter.
-    PH, // Identifier for the pH level parameter.
-    ELECTRONICS_TEMP, // Identifier for the electronics temperature parameter.
-    BATT_SOC, // Identifier for the battery state of charge (SOC) parameter.
-    BATT_VOLTAGE, // Identifier for the battery voltage parameter.
-    COUNT // Identifier for the total count of parameters (used for iteration or validation).
+    AIR_TEMP, // 0; Identifier for the air temperature parameter.
+    HUMIDITY, // 1; Identifier for the humidity parameter.
+    PRESSURE, // 2; Identifier for the pressure parameter.
+    CO2, // 3; Identifier for the carbon dioxide (CO2) parameter.
+    O2, // 4; Identifier for the oxygen (O2) parameter.
+    LIGHT, // 5; Identifier for the light intensity parameter.
+    WATER_TEMP, // 6; Identifier for the water temperature parameter.
+    WATER_LEVEL, // 7; Identifier for the water level parameter.
+    PH, // 8; Identifier for the pH level parameter.
+    ELECTRONICS_TEMP, // 9; Identifier for the electronics temperature parameter.
+    BATT_SOC, // 10; Identifier for the battery state of charge (SOC) parameter.
+    BATT_VOLTAGE, // 11; Identifier for the battery voltage parameter.
+    COUNT // 12; Identifier for the total count of parameters (used for iteration or validation).
 };
