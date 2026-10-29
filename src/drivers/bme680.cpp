@@ -1,7 +1,5 @@
 #include "bme680.h" // Include the header file that defines the BME680 class for the BME680 environmental sensor.
 
-// Register addresses, values and formulas follow the Bosch BME680 datasheet and Bosch's official
-// BME68x Sensor API (github.com/boschsensortec/BME68x_SensorAPI), floating-point version.
 namespace
 {
 constexpr uint8_t kChipId = 0x61; // Value the chip-ID register always holds on a BME680 (and BME688).
@@ -24,6 +22,7 @@ constexpr uint8_t kModeSleep = 0x00; // Sleep mode: chip idle, lowest power.
 constexpr uint8_t kModeForced = 0x01; // Forced mode: take ONE measurement, then go back to sleep automatically.
 
 // Oversampling codes: 1 = x1, 2 = x2, 3 = x4, 4 = x8, 5 = x16. Same settings as Bosch's own forced-mode example.
+
 constexpr uint8_t kOsTemp = 2; // Temperature x2.
 constexpr uint8_t kOsPres = 1; // Pressure x1.
 constexpr uint8_t kOsHum = 5; // Humidity x16.
@@ -32,6 +31,7 @@ constexpr uint8_t kCtrlMeasBase = static_cast<uint8_t>((kOsTemp << 5) | (kOsPres
 
 // How long one forced measurement takes, from Bosch's bme68x_get_meas_dur() formula, in microseconds:
 // 1963 us per oversampling cycle + 477*4 us switching + 477*5 us (gas slot) + 1000 us wake-up.
+
 constexpr uint32_t kCycles = 2 + 1 + 16; // Oversampling cycles for x2 temperature, x1 pressure, x16 humidity.
 constexpr uint32_t kMeasureUs = kCycles * 1963u + 477u * 4u + 477u * 5u + 1000u; // = 42 590 us.
 constexpr uint32_t kMeasureMs = (kMeasureUs + 999u) / 1000u; // Rounded UP to whole milliseconds = 43 ms.
@@ -40,12 +40,14 @@ constexpr uint32_t kPollMs = 10; // Wait between "is it done yet?" checks (Bosch
 constexpr int kPollTries = 5; // How many times to check before giving up (Bosch reference driver uses 5).
 
 // Plausibility limits = the sensor's specified operating range (Bosch BME680 datasheet).
+
 constexpr float kMinTempC = -40.0f; // Lowest temperature the sensor is specified for.
 constexpr float kMaxTempC = 85.0f; // Highest temperature the sensor is specified for.
 constexpr float kMinPressurePa = 30000.0f; // 300 hPa, lowest pressure the sensor is specified for.
 constexpr float kMaxPressurePa = 110000.0f; // 1100 hPa, highest pressure the sensor is specified for.
 
 // Positions of each coefficient inside the combined 37-byte calibration buffer (same indices as Bosch's driver).
+
 constexpr int kIdxT2Lsb = 0, kIdxT2Msb = 1, kIdxT3 = 2;
 constexpr int kIdxP1Lsb = 4, kIdxP1Msb = 5, kIdxP2Lsb = 6, kIdxP2Msb = 7, kIdxP3 = 8;
 constexpr int kIdxP4Lsb = 10, kIdxP4Msb = 11, kIdxP5Lsb = 12, kIdxP5Msb = 13, kIdxP7 = 14, kIdxP6 = 15;
@@ -96,6 +98,7 @@ Status BME680::readCalibration()
   cal_.p10 = c[kIdxP10];
 
   // h1 and h2 are 12-bit values that SHARE register 0xE2: h1 uses its low 4 bits, h2 uses its high 4 bits.
+
   cal_.h1 = static_cast<uint16_t>((static_cast<uint16_t>(c[kIdxH1Msb]) << 4) | (c[kIdxH1H2Lsb] & 0x0F));
   cal_.h2 = static_cast<uint16_t>((static_cast<uint16_t>(c[kIdxH2Msb]) << 4) | (c[kIdxH1H2Lsb] >> 4));
   cal_.h3 = static_cast<int8_t>(c[kIdxH3]);
@@ -238,11 +241,12 @@ size_t BME680::read(Sample* out, size_t capacity, uint32_t MET_s)
   }
 
   // Unpack the raw readings: pressure and temperature are 20 bits (MSB, LSB, top 4 bits of XLSB); humidity is 16 bits.
+
   uint32_t adcPres = (static_cast<uint32_t>(f[2]) << 12) | (static_cast<uint32_t>(f[3]) << 4) | (f[4] >> 4);
   uint32_t adcTemp = (static_cast<uint32_t>(f[5]) << 12) | (static_cast<uint32_t>(f[6]) << 4) | (f[7] >> 4);
   uint16_t adcHum = join(f[8], f[9]);
 
-  float tFine = 0.0f; // Bosch's intermediate "fine temperature", shared with the pressure formula.
+  float tFine = 0.0f; // Bosch's intermediate fine temperature, shared with the pressure formula.
   float tempC = compensateTemperature(adcTemp, tFine); // Raw -> degrees C.
   float pressurePa = compensatePressure(adcPres, tFine); // Raw -> Pa (temperature-corrected).
   float humidity = compensateHumidity(adcHum, tempC); // Raw -> %RH (temperature-corrected).
@@ -265,8 +269,6 @@ size_t BME680::read(Sample* out, size_t capacity, uint32_t MET_s)
   out[2] = makeSample(ParamID::PRESSURE, pressurePa, sp, MET_s);
   return kSampleCount; // Wrote 3 samples.
 }
-
-// ---- Compensation formulas: floating-point versions from Bosch's BME68x Sensor API (calc_temperature/pressure/humidity) ----
 
 float BME680::compensateTemperature(uint32_t adc, float& t_fine) const
 {

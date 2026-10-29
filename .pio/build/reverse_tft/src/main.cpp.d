@@ -183,7 +183,7 @@
  /Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h \
  include/board_pins.h src/drivers/arduino_i2c_bus.h include/i2c_bus.h \
  include/status.h src/drivers/max17048.h include/sensor.h \
- include/sample.h include/param_id.h \
+ include/sample.h include/param_id.h src/drivers/bme680.h \
  .pio/libdeps/reverse_tft/Adafruit\ GFX\ Library/Adafruit_GFX.h \
  /Users/josephmichelsen/.platformio/packages/framework-arduinoespressif32/cores/esp32/Print.h \
  .pio/libdeps/reverse_tft/Adafruit\ GFX\ Library/gfxfont.h \

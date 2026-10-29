@@ -15,7 +15,7 @@ class BME680 : public Sensor // Define the BME680 sensor class that inherits fro
     BME680(I2CBus& bus, DelayFn delayMs, uint8_t address = kDefaultAddress) // Constructor: the bus to talk through, the wait function, and the chip's I2C address.
         : bus_(bus), delayMs_(delayMs), address_(address) {}
 
-    const char* name() const override { return "bme680"; } // Override the name function to return the name of the sensor as a string.
+    const char* name() const override { return "BME680"; } // Override the name function to return the name of the sensor as a string.
     Status begin() override; // Override the begin function to initialize the BME680 sensor.
     size_t read(Sample* out, size_t capacity, uint32_t MET_s) override; // Override the read function to read sensor data into the provided output array.
 

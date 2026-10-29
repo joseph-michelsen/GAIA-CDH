@@ -1,4 +1,4 @@
-#include "max17048.h" // Include the header file that defines the Max17048 class for the MAX17048 fuel gauge sensor.
+#include "max17048.h" // Include the header file that defines the MAX17048 class for the MAX17048 fuel gauge sensor.
 
 namespace 
 {
@@ -15,7 +15,7 @@ constexpr float kMaxVolts = 4.5f; // Define the maximum acceptable voltage for t
 constexpr float kMaxPercent = 110.0f; // Define the maximum acceptable state of charge (SOC) percentage. If the measured SOC is above this threshold, it may indicate a problem with the battery or sensor.
 } 
 
-Status Max17048::readWord(uint8_t reg, uint16_t& value) // Define a member function of the Max17048 class to read a 16-bit word from the specified register of the MAX17048 sensor. The function takes the register address (reg) and a reference to a uint16_t variable (value) to store the read value.
+Status MAX17048::readWord(uint8_t reg, uint16_t& value) // Define a member function of the MAX17048 class to read a 16-bit word from the specified register of the MAX17048 sensor. The function takes the register address (reg) and a reference to a uint16_t variable (value) to store the read value.
 {
   uint8_t buf[2] = {0, 0}; // Create a buffer of 2 bytes to hold the raw data read from the sensor register.
   Status s = bus_.readRegs(kAddress, reg, buf, 2); // Use the I2CBus object (bus_) to read 2 bytes from the specified register (reg) of the MAX17048 sensor at the defined I2C address (kAddress). The read data is stored in the buf array, and the status of the operation is returned in the variable s.
@@ -28,7 +28,7 @@ Status Max17048::readWord(uint8_t reg, uint16_t& value) // Define a member funct
   return s; // Return the status of the read operation (s) to indicate whether the read was successful or if an error occurred.
 }
 
-Status Max17048::begin() 
+Status MAX17048::begin() 
 {
   uint16_t version = 0; // Declare a variable to hold the version information read from the MAX17048 sensor. This variable will be used to determine if the sensor is present and functioning correctly.
   Status s = readWord(kRegVersion, version); // Call the readWord function to read the version information from the MAX17048 sensor by specifying the register address (kRegVersion) and passing the version variable by reference. The status of the read operation is stored in the variable s.
@@ -37,7 +37,7 @@ Status Max17048::begin()
   return present_ ? Status::OK : Status::NOT_PRESENT; // Return Status::OK if the sensor is present and functioning correctly; otherwise, return Status::NOT_PRESENT to indicate that the sensor is not detected or not functioning properly.
 }
 
-size_t Max17048::read(Sample* out, size_t capacity, uint32_t MET_s) 
+size_t MAX17048::read(Sample* out, size_t capacity, uint32_t MET_s) 
 {
   if (out == nullptr || capacity < 2) 
   {
