@@ -11,6 +11,7 @@ namespace pins
     constexpr uint8_t SPI_MOSI = 35; // Define the pin number for the SPI bus MOSI (Master Out Slave In) line.
     constexpr uint8_t SPI_SCK = 36; // Define the pin number for the SPI bus SCK (Serial Clock) line.
     constexpr uint8_t SPI_MISO = 37; // Define the pin number for the SPI bus MISO (Master In Slave Out) line.
+    constexpr uint8_t SD_CS = 10; // Define the pin number for the Adalogger FeatherWing SD card chip select (Feather pin D10 = GPIO 10).
 
     constexpr uint8_t STEMMA_POWER = 7; // Define the pin number for controlling power to STEMMA devices (I2C sensors and peripherals).
     constexpr uint8_t PWM_OE = 14; // Define the pin number for controlling the output enable (OE) of a PWM (Pulse Width Modulation) signal.
