@@ -3,6 +3,7 @@
 #include "board_pins.h" // Include the header file that defines the pin mappings for the board.
 #include "drivers/arduino_i2c_bus.h" // Include the header file that defines the ArduinoI2CBus class for I2C communication using the Arduino Wire library.
 #include "drivers/max17048.h" // Include the header file that defines the Max17048 class for battery fuel gauge functionality.
+#include "drivers/scd30.h" // Include the header file that defines the SCD30 class for the CO2 sensor.
 #include "drivers/bme680.h" // Include the header file that defines the Bme680 class for the temperature/humidity/pressure sensor.
  
 #ifdef HAS_DEBUG_DISPLAY // Check if the HAS_DEBUG_DISPLAY macro is defined to include the display-related libraries and code.
@@ -13,6 +14,8 @@ static Adafruit_ST7789 tft(TFT_CS, TFT_DC, TFT_RST); // The Reverse TFT's built-
  
 static ArduinoI2CBus bus0(Wire); // Create an instance of the ArduinoI2CBus class for I2C communication using the Wire library.
 static MAX17048 battery(bus0); // Create an instance of the Max17048 class for battery fuel gauge functionality using the ArduinoI2CBus instance bus0.
+static SCD30 co2Sensor(bus0, delay); // SCD30 CO2 sensor on bus 0 (STEMMA QT, address 0x61). Uses delay() to wait for its answers.
+static bool co2WasConnected = false; // Whether the SCD30 answered the previous bus scan (to notice when it gets plugged in).
 static BME680 environment(bus0, delay); // BME680 on bus 0 (STEMMA QT, address 0x77). It uses Arduino's delay() to wait while it measures.
  
 static constexpr size_t kMaxDevices = 16; // Most I2C addresses we remember from one scan (far more than we expect).
@@ -25,6 +28,7 @@ static const char* deviceName(uint8_t addr) // What we expect to find at each I2
   switch (addr)
   {
     case 0x36: return "MAX17048 battery gauge (on the Feather)";
+    case 0x61: return "SCD30 CO2 sensor";
     case 0x68: return "PCF8523 real-time clock (Adalogger)";
     case 0x76: return "BME680 env sensor (SDO tied low)";
     case 0x77: return "BME680 env sensor";
@@ -41,6 +45,7 @@ static const char* labelOf(ParamID id) // Short label for the display (max 4 cha
     case ParamID::AIR_TEMP: return "Temp";
     case ParamID::HUMIDITY: return "RH";
     case ParamID::PRESSURE: return "Pres";
+    case ParamID::CO2: return "CO2";
     default: return "?";
   }
 }
@@ -54,6 +59,7 @@ static const char* unitOf(ParamID id) // Engineering unit of each parameter.
     case ParamID::AIR_TEMP: return "C";
     case ParamID::HUMIDITY: return "%";
     case ParamID::PRESSURE: return "Pa";
+    case ParamID::CO2: return "ppm";
     default: return "";
   }
 }
@@ -64,6 +70,7 @@ static int decimalsOf(ParamID id) // How many decimal places are worth showing.
   {
     case ParamID::BATT_VOLTAGE: return 2; // 3.70 V
     case ParamID::PRESSURE: return 0; // 83500 Pa
+    case ParamID::CO2: return 0; // 812 ppm
     default: return 1; // 22.4 C, 30.1 %
   }
 }
@@ -84,6 +91,18 @@ static void scanBus() // Probe every I2C address and remember which ones answere
   }
 }
  
+static bool wasFound(uint8_t addr) // True if addr answered during the latest scan.
+{
+  for (size_t i = 0; i < foundCount && i < kMaxDevices; i++)
+  {
+    if (foundAddrs[i] == addr)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 static void printScan() // Serial: every address found, with what we think it is.
 {
   Serial.printf("I2C bus 0: %u device(s)\n", static_cast<unsigned>(foundCount));
@@ -154,6 +173,22 @@ static void drawSample(int row, const Sample& s) // Green = OK, yellow = out of 
   drawLine(row, color, line);
 }
  
+static void drawCo2(int row, bool connected, const Sample& s) // CO2 row: grey when unplugged, yellow while warming up, otherwise like any sample.
+{
+  if (!connected)
+  {
+    drawLine(row, 0x8410, "CO2  not connected"); // 0x8410 = grey.
+  }
+  else if (s.status == Status::NOT_PRESENT)
+  {
+    drawLine(row, ST77XX_YELLOW, "CO2  warming up..."); // Normal for the first reading(s) after start-up.
+  }
+  else
+  {
+    drawSample(row, s);
+  }
+}
+
 static void drawSamples(int firstRow, const Sample* s, size_t n, size_t expected) // Draw each sample on its own row; blank any missing rows.
 {
   for (size_t i = 0; i < expected; i++)
@@ -198,7 +233,7 @@ void setup()
   }
  
   scanBus(); // Find everything on the bus.
-  printScan(); // Expect 0x36 (battery gauge) and 0x77 (BME680).
+  printScan(); // Expect 0x36 (battery gauge) and 0x77 (BME680), plus 0x61 if the SCD30 is plugged in.
   Serial.printf("max17048 begin: %s\n", statusName(battery.begin())); // Initialize the battery gauge and print the result.
   Serial.printf("bme680 begin: %s\n", statusName(environment.begin())); // Initialize the BME680 and print the result.
 }
@@ -214,11 +249,33 @@ void loop()
  
   Sample env[BME680::kSampleCount]; // Air temperature, humidity, pressure.
   size_t nEnv = environment.read(env, BME680::kSampleCount, MET_s); // Takes about 45 ms.
+
+  bool co2Connected = wasFound(SCD30::kAddress); // Is the SCD30 plugged in right now?
+  Sample co2[SCD30::kSampleCount]; // CO2 concentration (only filled in when the sensor is connected).
+  size_t nCo2 = 0;
+  if (co2Connected)
+  {
+    if (!co2WasConnected)
+    {
+      Serial.printf("SCD30 detected, begin: %s\n", statusName(co2Sensor.begin())); // Just plugged in (or first cycle): set it up and start it measuring.
+    }
+    if (nEnv == BME680::kSampleCount && isUsable(env[2].status))
+    {
+      co2Sensor.setAmbientPressure(env[2].value); // Feed the BME680 pressure to the SCD30 so its CO2 reading is correct at altitude.
+    }
+    nCo2 = co2Sensor.read(co2, SCD30::kSampleCount, MET_s); // Waits for the sensor's next 2 s measurement if needed.
+  }
+  else if (co2WasConnected)
+  {
+    Serial.println("SCD30 disconnected");
+  }
+  co2WasConnected = co2Connected;
  
   Serial.printf("--- MET %lu s ---\n", static_cast<unsigned long>(MET_s));
   printScan();
   printSamples(battery, bat, nBat);
   printSamples(environment, env, nEnv);
+  printSamples(co2Sensor, co2, nCo2);
  
   #ifdef HAS_DEBUG_DISPLAY
   drawScan(0); // Row 0: I2C addresses found.
@@ -226,7 +283,8 @@ void loop()
   drawSamples(3, env, nEnv, BME680::kSampleCount); // Rows 3-5: temperature, humidity, pressure.
   char metLine[kColumns + 1];
   snprintf(metLine, sizeof(metLine), "MET %lu s", static_cast<unsigned long>(MET_s));
-  drawLine(6, ST77XX_WHITE, metLine); // Row 6: time since boot.
+  drawCo2(6, co2Connected && nCo2 == SCD30::kSampleCount, co2[0]); // Row 6: CO2.
+  drawLine(7, ST77XX_WHITE, metLine); // Row 7: time since boot.
   #endif
  
   MET_s += 2;
