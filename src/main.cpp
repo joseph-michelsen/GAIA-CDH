@@ -12,7 +12,7 @@ static Adafruit_ST7789 tft(TFT_CS, TFT_DC, TFT_RST); // The Reverse TFT's built-
 #endif
  
 static ArduinoI2CBus bus0(Wire); // Create an instance of the ArduinoI2CBus class for I2C communication using the Wire library.
-static Max17048 battery(bus0); // Create an instance of the Max17048 class for battery fuel gauge functionality using the ArduinoI2CBus instance bus0.
+static MAX17048 battery(bus0); // Create an instance of the Max17048 class for battery fuel gauge functionality using the ArduinoI2CBus instance bus0.
 static BME680 environment(bus0, delay); // BME680 on bus 0 (STEMMA QT, address 0x77). It uses Arduino's delay() to wait while it measures.
  
 static constexpr size_t kMaxDevices = 16; // Most I2C addresses we remember from one scan (far more than we expect).

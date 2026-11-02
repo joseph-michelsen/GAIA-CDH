@@ -34,7 +34,7 @@ void test_pins_are_unique()
   const uint8_t all[] = 
   {
     pins::I2C0_SDA, pins::I2C0_SCL, pins::I2C1_SDA, pins::I2C1_SCL,
-    pins::SPI_SCK, pins::SPI_MOSI, pins::SPI_MISO,
+    pins::SPI_SCK, pins::SPI_MOSI, pins::SPI_MISO, pins::SD_CS,
     pins::STEMMA_POWER, pins::PWM_OE
   };
 

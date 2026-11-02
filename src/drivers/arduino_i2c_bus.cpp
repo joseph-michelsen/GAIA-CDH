@@ -66,3 +66,55 @@ Status ArduinoI2CBus::writeRegs(uint8_t addr, uint8_t reg, const uint8_t* data, 
 
     return Status::BUS_ERROR; // Return BUS_ERROR if the read operation fails after the maximum number of attempts.
 }
+
+Status ArduinoI2CBus::write(uint8_t addr, const uint8_t* data, size_t len)
+{
+    if (data == nullptr || len == 0)
+    {
+        return Status::BUS_ERROR; // Return BUS_ERROR if there is nothing valid to send.
+    }
+
+    for (int attempt = 0; attempt < kMaxAttempts; ++attempt)
+    {
+        wire_.beginTransmission(addr); // Begin an I2C transmission to the specified address.
+        wire_.write(data, len); // Queue the bytes (for a command-style sensor these are the command and its arguments).
+
+        if (wire_.endTransmission() == 0) // Send them and finish with a STOP condition.
+        {
+            return Status::OK; // Return OK if the device acknowledged everything.
+        }
+
+        delay(2); // Delay for 2 milliseconds before retrying.
+    }
+
+    return Status::BUS_ERROR; // Return BUS_ERROR if the write fails after the maximum number of attempts.
+}
+
+Status ArduinoI2CBus::read(uint8_t addr, uint8_t* out, size_t len)
+{
+    if (out == nullptr || len == 0 || len > 32)
+    {
+        return Status::BUS_ERROR; // Return BUS_ERROR if the output buffer is null, length is zero, or length exceeds 32 bytes.
+    }
+
+    for (int attempt = 0; attempt < kMaxAttempts; ++attempt)
+    {
+        uint8_t got = wire_.requestFrom(addr, static_cast<uint8_t>(len)); // A complete read transaction of its own: START, address, len bytes, STOP.
+        if (got == len)
+        {
+            for (size_t i = 0; i < len; ++i)
+            {
+                out[i] = static_cast<uint8_t>(wire_.read());
+            }
+            return Status::OK; // Return OK if all bytes arrived.
+        }
+
+        while (wire_.available() > 0)
+        {
+            wire_.read(); // Throw away any partial data before retrying.
+        }
+        delay(2); // Delay for 2 milliseconds before retrying.
+    }
+
+    return Status::BUS_ERROR; // Return BUS_ERROR if the read fails after the maximum number of attempts.
+}
