@@ -52,6 +52,9 @@ class FakeBme680Bus : public I2CBus
     if (reg == 0xE0 && data[0] == 0xB6) { regs[0x72] = 0; regs[0x74] = 0; regs[0x75] = 0; } // Soft reset clears settings.
     return Status::OK;
   }
+
+  Status write(uint8_t, const uint8_t*, size_t) override { return Status::BUS_ERROR; } // The BME680 never uses plain transfers.
+  Status read(uint8_t, uint8_t*, size_t) override { return Status::BUS_ERROR; }
 };
 
 static uint32_t g_waitedMs = 0;

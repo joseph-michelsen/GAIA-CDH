@@ -3,6 +3,7 @@
 #include "drivers/max17048.h"
 
 // A pretend I2C bus: tests choose what each register "contains".
+
 class FakeI2CBus : public I2CBus 
 {
   public:
@@ -20,6 +21,8 @@ class FakeI2CBus : public I2CBus
   }
 
   Status writeRegs(uint8_t, uint8_t, const uint8_t*, size_t) override { return Status::OK; }
+  Status write(uint8_t, const uint8_t*, size_t) override { return Status::BUS_ERROR; } // The MAX17048 never uses plain transfers.
+  Status read(uint8_t, uint8_t*, size_t) override { return Status::BUS_ERROR; }
 };
 
 static int asInt(Status s) { return static_cast<int>(s); }
@@ -31,7 +34,7 @@ void test_detects_real_chip()
 {
   FakeI2CBus bus;
   bus.regs[0x08] = 0x0012; // a valid version
-  Max17048 gauge(bus);
+  MAX17048 gauge(bus);
   TEST_ASSERT_EQUAL_INT(asInt(Status::OK), asInt(gauge.begin()));
 }
 
@@ -39,7 +42,7 @@ void test_no_battery_reports_not_present()
 {
   FakeI2CBus bus;
   bus.regs[0x08] = 0xFFFF; // what the chip reports without a battery
-  Max17048 gauge(bus);
+  MAX17048 gauge(bus);
   TEST_ASSERT_EQUAL_INT(asInt(Status::NOT_PRESENT), asInt(gauge.begin()));
   Sample s[2];
   TEST_ASSERT_EQUAL_UINT(2, gauge.read(s, 2, 10));
@@ -53,7 +56,7 @@ void test_converts_voltage_and_charge()
   bus.regs[0x08] = 0x0012;
   bus.regs[0x02] = 0xB900; // 47360 x 78.125 uV = 3.700 V
   bus.regs[0x04] = 0x3200; // 12800 / 256 = 50.0 %
-  Max17048 gauge(bus);
+  MAX17048 gauge(bus);
   gauge.begin();
   Sample s[2];
   gauge.read(s, 2, 42);
@@ -68,7 +71,7 @@ void test_impossible_voltage_flagged()
   FakeI2CBus bus;
   bus.regs[0x08] = 0x0012;
   bus.regs[0x02] = 0x0000; // 0 V: impossible for a connected cell
-  Max17048 gauge(bus);
+  MAX17048 gauge(bus);
   gauge.begin();
   Sample s[2];
   gauge.read(s, 2, 0);
@@ -78,7 +81,7 @@ void test_impossible_voltage_flagged()
 void test_lost_bus_marks_bus_error() {
   FakeI2CBus bus;
   bus.regs[0x08] = 0x0012;
-  Max17048 gauge(bus);
+  MAX17048 gauge(bus);
   gauge.begin();
   bus.connected = false; // the wire "breaks" mid-mission
   Sample s[2];
