@@ -2,6 +2,8 @@
 #include "board_pins.h"
 #include "sample.h"
 #include "sensor.h"
+#include "storage.h"
+#include <string.h>
 
 void setUp() {}
 void tearDown() {}
@@ -78,6 +80,77 @@ void test_fake_sensor_through_interface()
   TEST_ASSERT_FALSE(isUsable(buf[0].status));
 }
 
+// A fake storage: proves the Storage contract is complete and usable with no SD card at all.
+class FakeStorage : public Storage
+{
+  public:
+  char path[Storage::kMaxPathLength + 1] = {};
+  uint8_t data[64] = {};
+  size_t size = 0;
+
+  Status begin() override { return Status::OK; }
+  bool exists(const char* p) override { return size > 0 && strcmp(p, path) == 0; }
+  Status append(const char* p, const uint8_t* d, size_t len) override
+  {
+    if (!isValidPath(p) || size + len > sizeof(data)) return Status::OUT_OF_RANGE;
+    strncpy(path, p, sizeof(path) - 1);
+    memcpy(data + size, d, len);
+    size += len;
+    return Status::OK;
+  }
+  Status writeFile(const char* p, const uint8_t* d, size_t len) override { size = 0; return append(p, d, len); }
+  Status readFile(const char* p, uint8_t* out, size_t capacity, size_t& got) override
+  {
+    got = 0;
+    if (!exists(p)) return Status::NOT_PRESENT;
+    if (size > capacity) return Status::OUT_OF_RANGE;
+    memcpy(out, data, size);
+    got = size;
+    return Status::OK;
+  }
+  Status freeBytes(uint64_t& bytes) override { bytes = sizeof(data) - size; return Status::OK; }
+};
+
+void test_fake_storage_through_interface()
+{
+  FakeStorage fake;
+  Storage& store = fake; // used only via the interface
+  const uint8_t a[] = {'a', 'b'};
+  const uint8_t b[] = {'c'};
+  TEST_ASSERT_EQUAL_INT(static_cast<int>(Status::OK), static_cast<int>(store.append("/log.csv", a, 2)));
+  TEST_ASSERT_EQUAL_INT(static_cast<int>(Status::OK), static_cast<int>(store.append("/log.csv", b, 1)));
+  uint8_t out[8];
+  size_t got = 0;
+  TEST_ASSERT_EQUAL_INT(static_cast<int>(Status::OK), static_cast<int>(store.readFile("/log.csv", out, sizeof(out), got)));
+  TEST_ASSERT_EQUAL_UINT(3, got);
+  TEST_ASSERT_EQUAL_MEMORY("abc", out, 3);
+  TEST_ASSERT_EQUAL_INT(static_cast<int>(Status::NOT_PRESENT), static_cast<int>(store.readFile("/other.csv", out, sizeof(out), got)));
+}
+
+void test_param_names()
+{
+  TEST_ASSERT_EQUAL_STRING("CO2", paramName(ParamID::CO2));
+  TEST_ASSERT_EQUAL_STRING("AIR_TEMP", paramName(ParamID::AIR_TEMP));
+  TEST_ASSERT_EQUAL_STRING("BATT_VOLTAGE", paramName(ParamID::BATT_VOLTAGE));
+  TEST_ASSERT_EQUAL_STRING("INVALID", paramName(ParamID::COUNT));
+  for (uint8_t i = 0; i < static_cast<uint8_t>(ParamID::COUNT); i++)
+  {
+    TEST_ASSERT_NOT_EQUAL(0, strcmp("INVALID", paramName(static_cast<ParamID>(i)))); // Every real parameter has a name.
+  }
+}
+
+void test_path_rules()
+{
+  TEST_ASSERT_TRUE(isValidPath("/log_2026-11-01.csv"));
+  TEST_ASSERT_TRUE(isValidPath("/m"));
+  TEST_ASSERT_FALSE(isValidPath(nullptr));
+  TEST_ASSERT_FALSE(isValidPath("log.csv")); // Must start with "/".
+  TEST_ASSERT_FALSE(isValidPath("/"));
+  TEST_ASSERT_FALSE(isValidPath("/logs/day1.csv")); // No sub-folders.
+  TEST_ASSERT_TRUE(isValidPath("/abcdefghijklmnopqrstuvwxyz1234")); // 31 characters: the limit.
+  TEST_ASSERT_FALSE(isValidPath("/abcdefghijklmnopqrstuvwxyz12345")); // 32: too long.
+}
+
 int main() 
 {
   UNITY_BEGIN();
@@ -86,5 +159,8 @@ int main()
   RUN_TEST(test_only_ok_is_usable);
   RUN_TEST(test_pins_are_unique);
   RUN_TEST(test_fake_sensor_through_interface);
+  RUN_TEST(test_fake_storage_through_interface);
+  RUN_TEST(test_path_rules);
+  RUN_TEST(test_param_names);
   return UNITY_END();
 }

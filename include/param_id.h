@@ -17,3 +17,25 @@ enum class ParamID : uint8_t // Define an enumeration class named ParamID with a
     BATT_VOLTAGE, // 11; Identifier for the battery voltage parameter.
     COUNT // 12; Identifier for the total count of parameters (used for iteration or validation).
 };
+
+inline const char* paramName(ParamID id) // Returns the parameter's name as text (same spelling as in the code) for logs, the SD card and telemetry.
+{
+    switch (id) // No "default:" on purpose: with -Wall -Werror, adding a ParamID without a name here is a build error.
+    {
+        case ParamID::AIR_TEMP: return "AIR_TEMP";
+        case ParamID::HUMIDITY: return "HUMIDITY";
+        case ParamID::PRESSURE: return "PRESSURE";
+        case ParamID::CO2: return "CO2";
+        case ParamID::O2: return "O2";
+        case ParamID::LIGHT: return "LIGHT";
+        case ParamID::WATER_TEMP: return "WATER_TEMP";
+        case ParamID::WATER_LEVEL: return "WATER_LEVEL";
+        case ParamID::PH: return "PH";
+        case ParamID::ELECTRONICS_TEMP: return "ELECTRONICS_TEMP";
+        case ParamID::BATT_SOC: return "BATT_SOC";
+        case ParamID::BATT_VOLTAGE: return "BATT_VOLTAGE";
+        case ParamID::COUNT: return "INVALID"; // COUNT is not a real parameter (it marks "never filled in").
+    }
+
+    return "INVALID"; // Unreachable for named values; needed because an enum class can hold other numbers.
+}

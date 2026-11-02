@@ -1,7 +1,7 @@
 #pragma once // Ensure the header file is included only once during compilation to prevent multiple definition errors.
 #include <stdint.h> // Include the standard integer types header for fixed-width integer types.
 #include "i2c_bus.h" // Include the header file that defines the I2CBus class for I2C communication.
-#include "status.h" // Include the header file that defines the Status enumeration class.\
+#include "status.h" // Include the header file that defines the Status enumeration class.
 
 // A calendar date and time of day, as kept by the real-time clock (24-hour clock, years 2000-2099).
 
